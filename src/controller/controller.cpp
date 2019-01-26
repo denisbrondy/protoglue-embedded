@@ -2,7 +2,6 @@
 #include <WiFi.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
-#include <BLEServer.h>
 #include <BLE2902.h>
 #include <stepper.h>
 
@@ -16,7 +15,6 @@ BLECharacteristic *commandCharacteristic;  // Command
 
 void Controller::BLEServerCallbacksImpl::setController(Controller *controller)
 {
-    Serial.println("Settings controller");
     this->_controller = controller;
 }
 
@@ -29,6 +27,7 @@ void Controller::BLEServerCallbacksImpl::onConnect(BLEServer *pServer)
 void Controller::BLEServerCallbacksImpl::onDisconnect(BLEServer *pServer)
 {
     Serial.println("Bluetooth disconnected with pair");
+    this->_controller->_onDisconnection();
     _controller->_mode = PAIRING;
 };
 
@@ -41,10 +40,12 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
     if (command == 1)
     {
         uint16_t grain = (data[1] << 8) + data[2];
+        this->_controller->_moveForwardCmd(grain);
     }
     else if (command == 2)
     {
         uint16_t grain = (data[1] << 8) + data[2];
+        this->_controller->_moveBackwardCmd(grain);
     }
     else if (command == 3)
     {
@@ -54,6 +55,7 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
     }
     else if (command == 5)
     {
+        this->_controller->_onStopCmd();
     }
     else if (command == 6)
     {
@@ -63,7 +65,6 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
 
 void Controller::BLECharacteristicCallbacksImp::setController(Controller *controller)
 {
-    Serial.println("Settings controller");
     this->_controller = controller;
 }
 
@@ -85,6 +86,7 @@ Controller::Controller()
     feedbackCharacteristic->addDescriptor(new BLE2902());
 
     BLECharacteristicCallbacksImp *lBLECharacteristicCallbacksImp = new Controller::BLECharacteristicCallbacksImp();
+    lBLECharacteristicCallbacksImp->setController(this);
 
     // Command
     commandCharacteristic = pService->createCharacteristic(
@@ -98,7 +100,30 @@ Controller::Controller()
     Serial.println("Controller started");
 }
 
-void Controller::start()
+void Controller::setOnDisconnectionCallback(void (*onDisconnection)(void))
 {
-    
+    this->_onDisconnection = onDisconnection;
+}
+
+void Controller::setMoveForwardCmdCallback(void (*moveForwardCmd)(uint16_t grain))
+{
+    this->_moveForwardCmd = moveForwardCmd;
+}
+
+void Controller::setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t grain))
+{
+    this->_moveBackwardCmd = moveBackwardCmd;
+}
+
+void Controller::setOnStopCmdCallback(void (*onStopCmd)(void)) {
+    this->_onStopCmd = onStopCmd;
+}
+
+void Controller::notify(uint8_t *data, size_t size)
+{
+    if (this->_mode == CONNECTED)
+    {
+        feedbackCharacteristic->setValue(data, size);
+        feedbackCharacteristic->notify();
+    }
 }
