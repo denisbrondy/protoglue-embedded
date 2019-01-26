@@ -14,6 +14,8 @@ class Controller
 {
 private:
   MODE _mode = PAIRING;
+  BLECharacteristic *_feedbackCharacteristic;
+  BLECharacteristic *_commandCharacteristic;
   void (*_onDisconnection)(void);
   void (*_moveForwardCmd)(uint16_t grain);
   void (*_moveBackwardCmd)(uint16_t grain);

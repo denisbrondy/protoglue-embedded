@@ -10,8 +10,6 @@ const std::string DEVICE = "PROTOGLUE";
 #define SERVICE_UUID "39ead0db-0bbf-449a-9af9-24001ea09aa3"
 #define FEEDBACK_CHARACTERISTIC_UUID "38149ecc-adb2-4ff3-89d5-6083d52c5e9f"
 #define COMMAND_CHARACTERISTIC_UUID "8a21ad2c-279d-41d1-94bf-6916ecbb3695"
-BLECharacteristic *feedbackCharacteristic; // Feedbacks
-BLECharacteristic *commandCharacteristic;  // Command
 
 void Controller::BLEServerCallbacksImpl::setController(Controller *controller)
 {
@@ -80,20 +78,20 @@ Controller::Controller()
     BLEService *pService = pServer->createService(SERVICE_UUID);
 
     // Feedback
-    feedbackCharacteristic = pService->createCharacteristic(
+    this->_feedbackCharacteristic = pService->createCharacteristic(
         FEEDBACK_CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_NOTIFY);
-    feedbackCharacteristic->addDescriptor(new BLE2902());
+    this->_feedbackCharacteristic->addDescriptor(new BLE2902());
 
     BLECharacteristicCallbacksImp *lBLECharacteristicCallbacksImp = new Controller::BLECharacteristicCallbacksImp();
     lBLECharacteristicCallbacksImp->setController(this);
 
     // Command
-    commandCharacteristic = pService->createCharacteristic(
+    this->_commandCharacteristic = pService->createCharacteristic(
         COMMAND_CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_WRITE);
-    commandCharacteristic->setCallbacks(lBLECharacteristicCallbacksImp);
-    commandCharacteristic->addDescriptor(new BLE2902());
+    this->_commandCharacteristic->setCallbacks(lBLECharacteristicCallbacksImp);
+    this->_commandCharacteristic->addDescriptor(new BLE2902());
 
     pService->start();
     pServer->getAdvertising()->start();
@@ -115,7 +113,8 @@ void Controller::setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t gra
     this->_moveBackwardCmd = moveBackwardCmd;
 }
 
-void Controller::setOnStopCmdCallback(void (*onStopCmd)(void)) {
+void Controller::setOnStopCmdCallback(void (*onStopCmd)(void))
+{
     this->_onStopCmd = onStopCmd;
 }
 
@@ -123,7 +122,7 @@ void Controller::notify(uint8_t *data, size_t size)
 {
     if (this->_mode == CONNECTED)
     {
-        feedbackCharacteristic->setValue(data, size);
-        feedbackCharacteristic->notify();
+        this->_feedbackCharacteristic->setValue(data, size);
+        this->_feedbackCharacteristic->notify();
     }
 }
