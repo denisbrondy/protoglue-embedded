@@ -35,14 +35,14 @@ void moveForward(uint16_t grain)
 {
   Serial.println("Moving forward");
   Serial.println(grain);
-  stepper->move(FORWARD, (int)grain); // TBD TO CHECK THE CAST
+  stepper->move(FORWARD, (int)grain); // TBD TO CHECK THE CAST 
 }
 
 void moveBackward(uint16_t grain)
 {
   Serial.println("Moving backward");
   Serial.println(grain);
-  stepper->move(BACKWARD, (int)grain); // TBD TO CHECK THE CAST
+  stepper->move(BACKWARD, (int)grain); // TBD TO CHECK THE CAST 
 }
 
 void stopMotor()
