@@ -7,9 +7,10 @@ Stepper *stepper;
 
 void feedbackHandler(void *parameters);
 void stepperHandler(void *parameters);
-void moveForward(uint16_t grain);
-void moveBackward(uint16_t grain);
+void moveForward(uint16_t stepNbr);
+void moveBackward(uint16_t stepNbr);
 void stopMotor();
+void goToZero();
 
 void setup()
 {
@@ -22,6 +23,7 @@ void setup()
   controller->setMoveBackwardCmdCallback(&moveBackward);
   controller->setOnDisconnectionCallback(&stopMotor);
   controller->setOnStopCmdCallback(&stopMotor);
+  controller->setOnGoToZeroCallback(&goToZero);
   xTaskCreate(feedbackHandler, "FEEDBACK_THREAD", 4096 * 2, NULL, 5, NULL);
   xTaskCreate(stepperHandler, "STEPPER_THREAD", 4096 * 2, NULL, 5, NULL);
 }
@@ -31,18 +33,18 @@ void loop()
   vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
-void moveForward(uint16_t grain)
+void moveForward(uint16_t stepNbr)
 {
   Serial.println("Moving forward");
-  Serial.println(grain);
-  stepper->move(FORWARD, (int)grain); // TBD TO CHECK THE CAST 
+  Serial.println(stepNbr);
+  stepper->move(FORWARD, (int)stepNbr); // TBD TO CHECK THE CAST
 }
 
-void moveBackward(uint16_t grain)
+void moveBackward(uint16_t stepNbr)
 {
   Serial.println("Moving backward");
-  Serial.println(grain);
-  stepper->move(BACKWARD, (int)grain); // TBD TO CHECK THE CAST 
+  Serial.println(stepNbr);
+  stepper->move(BACKWARD, (int)stepNbr); // TBD TO CHECK THE CAST
 }
 
 void stopMotor()
@@ -51,14 +53,21 @@ void stopMotor()
   stepper->stop();
 }
 
+void goToZero()
+{
+  Serial.println("Going to zero position");
+  stepper->goToZero();
+}
+
 void feedbackHandler(void *parameters)
 {
   while (true)
   {
     int32_t position = stepper->getPosition();
-    uint8_t data[8] = {position, (position >> 8), (position >> 16), (position >> 24),
-                       position, (position >> 8), (position >> 16), (position >> 24)};
-    controller->notify(data, 8);
+    uint8_t moving = (uint8_t)stepper->moving();
+    uint8_t data[5] = {position, (position >> 8), (position >> 16), (position >> 24),
+                       moving};
+    controller->notify(data, 5);
     vTaskDelay(pdMS_TO_TICKS(250));
   }
   vTaskDelete(NULL);

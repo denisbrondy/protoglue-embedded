@@ -37,27 +37,21 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
     Serial.println(command);
     if (command == 1)
     {
-        uint16_t grain = (data[1] << 8) + data[2];
-        this->_controller->_moveForwardCmd(grain);
+        uint16_t stepNbr = (data[1] << 8) + data[2];
+        this->_controller->_moveForwardCmd(stepNbr);
     }
     else if (command == 2)
     {
-        uint16_t grain = (data[1] << 8) + data[2];
-        this->_controller->_moveBackwardCmd(grain);
+        uint16_t stepNbr = (data[1] << 8) + data[2];
+        this->_controller->_moveBackwardCmd(stepNbr);
     }
     else if (command == 3)
     {
+        this->_controller->_onStopCmd();
     }
     else if (command == 4)
     {
-    }
-    else if (command == 5)
-    {
-        this->_controller->_onStopCmd();
-    }
-    else if (command == 6)
-    {
-        Serial.println("MAKE COURSE");
+        this->_controller->_onGoToZeroCmd();
     }
 };
 
@@ -103,12 +97,12 @@ void Controller::setOnDisconnectionCallback(void (*onDisconnection)(void))
     this->_onDisconnection = onDisconnection;
 }
 
-void Controller::setMoveForwardCmdCallback(void (*moveForwardCmd)(uint16_t grain))
+void Controller::setMoveForwardCmdCallback(void (*moveForwardCmd)(uint16_t stepNbr))
 {
     this->_moveForwardCmd = moveForwardCmd;
 }
 
-void Controller::setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t grain))
+void Controller::setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t stepNbr))
 {
     this->_moveBackwardCmd = moveBackwardCmd;
 }
@@ -116,6 +110,11 @@ void Controller::setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t gra
 void Controller::setOnStopCmdCallback(void (*onStopCmd)(void))
 {
     this->_onStopCmd = onStopCmd;
+}
+
+void Controller::setOnGoToZeroCallback(void (*onGoToZeroCmd)(void))
+{
+    this->_onGoToZeroCmd = onGoToZeroCmd;
 }
 
 void Controller::notify(uint8_t *data, size_t size)
