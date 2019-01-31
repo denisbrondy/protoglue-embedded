@@ -17,20 +17,22 @@ private:
   BLECharacteristic *_feedbackCharacteristic;
   BLECharacteristic *_commandCharacteristic;
   void (*_onDisconnection)(void);
-  void (*_moveForwardCmd)(uint16_t stepNbr);
-  void (*_moveBackwardCmd)(uint16_t stepNbr);
+  void (*_onMoveForwardCmd)(uint16_t stepNbr);
+  void (*_onMoveBackwardCmd)(uint16_t stepNbr);
   void (*_onStopCmd)(void);
   void (*_onGoToZeroCmd)(void);
+  void (*_onResetZeroPositionCmd)(void);
 
 public:
   Controller();
   void notify(uint8_t *data, size_t size);
-  // Callbacks
+  // Command callbacks
   void setOnDisconnectionCallback(void (*onDisconnection)(void));
-  void setMoveForwardCmdCallback(void (*moveForwardCmd)(uint16_t stepNbr));
-  void setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t stepNbr));
+  void setOnMoveForwardCmdCallback(void (*onMoveForwardCmd)(uint16_t stepNbr));
+  void setOnMoveBackwardCmdCallback(void (*onMoveBackwardCmd)(uint16_t stepNbr));
   void setOnStopCmdCallback(void (*onStopCmd)(void));
-  void setOnGoToZeroCallback(void (*onGoToZeroCmd)(void));
+  void setOnGoToZeroCmdCallback(void (*onGoToZeroCmd)(void));
+  void setOnResetZeroPositonCmdCallback(void (*onResetZeroPositionCmd)(void));
 
   class BLEServerCallbacksImpl : public BLEServerCallbacks
   {

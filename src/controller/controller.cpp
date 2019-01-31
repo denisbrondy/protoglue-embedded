@@ -38,12 +38,12 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
     if (command == 1)
     {
         uint16_t stepNbr = (data[1] << 8) + data[2];
-        this->_controller->_moveForwardCmd(stepNbr);
+        this->_controller->_onMoveForwardCmd(stepNbr);
     }
     else if (command == 2)
     {
         uint16_t stepNbr = (data[1] << 8) + data[2];
-        this->_controller->_moveBackwardCmd(stepNbr);
+        this->_controller->_onMoveBackwardCmd(stepNbr);
     }
     else if (command == 3)
     {
@@ -52,6 +52,10 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
     else if (command == 4)
     {
         this->_controller->_onGoToZeroCmd();
+    }
+    else if (command == 5)
+    {
+        this->_controller->_onResetZeroPositionCmd();
     }
 };
 
@@ -97,14 +101,14 @@ void Controller::setOnDisconnectionCallback(void (*onDisconnection)(void))
     this->_onDisconnection = onDisconnection;
 }
 
-void Controller::setMoveForwardCmdCallback(void (*moveForwardCmd)(uint16_t stepNbr))
+void Controller::setOnMoveForwardCmdCallback(void (*onMoveForwardCmd)(uint16_t stepNbr))
 {
-    this->_moveForwardCmd = moveForwardCmd;
+    this->_onMoveForwardCmd = onMoveForwardCmd;
 }
 
-void Controller::setMoveBackwardCmdCallback(void (*moveBackwardCmd)(uint16_t stepNbr))
+void Controller::setOnMoveBackwardCmdCallback(void (*onMoveBackwardCmd)(uint16_t stepNbr))
 {
-    this->_moveBackwardCmd = moveBackwardCmd;
+    this->_onMoveBackwardCmd = onMoveBackwardCmd;
 }
 
 void Controller::setOnStopCmdCallback(void (*onStopCmd)(void))
@@ -112,9 +116,14 @@ void Controller::setOnStopCmdCallback(void (*onStopCmd)(void))
     this->_onStopCmd = onStopCmd;
 }
 
-void Controller::setOnGoToZeroCallback(void (*onGoToZeroCmd)(void))
+void Controller::setOnGoToZeroCmdCallback(void (*onGoToZeroCmd)(void))
 {
     this->_onGoToZeroCmd = onGoToZeroCmd;
+}
+
+void Controller::setOnResetZeroPositonCmdCallback(void (*onResetZeroPositionCmd)(void))
+{
+    this->_onResetZeroPositionCmd = onResetZeroPositionCmd;
 }
 
 void Controller::notify(uint8_t *data, size_t size)

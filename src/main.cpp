@@ -11,6 +11,7 @@ void moveForward(uint16_t stepNbr);
 void moveBackward(uint16_t stepNbr);
 void stopMotor();
 void goToZero();
+void resetZeroPosition();
 
 void setup()
 {
@@ -19,11 +20,12 @@ void setup()
   stepper = new Stepper(GPIO_NUM_0, GPIO_NUM_15, GPIO_NUM_2, 10);
   stepper->setFrequency(20);
   controller = new Controller();
-  controller->setMoveForwardCmdCallback(&moveForward);
-  controller->setMoveBackwardCmdCallback(&moveBackward);
+  controller->setOnMoveForwardCmdCallback(&moveForward);
+  controller->setOnMoveBackwardCmdCallback(&moveBackward);
   controller->setOnDisconnectionCallback(&stopMotor);
   controller->setOnStopCmdCallback(&stopMotor);
-  controller->setOnGoToZeroCallback(&goToZero);
+  controller->setOnGoToZeroCmdCallback(&goToZero);
+  controller->setOnResetZeroPositonCmdCallback(&resetZeroPosition);
   xTaskCreate(feedbackHandler, "FEEDBACK_THREAD", 4096 * 2, NULL, 5, NULL);
   xTaskCreate(stepperHandler, "STEPPER_THREAD", 4096 * 2, NULL, 5, NULL);
 }
@@ -57,6 +59,12 @@ void goToZero()
 {
   Serial.println("Going to zero position");
   stepper->goToZero();
+}
+
+void resetZeroPosition()
+{
+  Serial.println("Resetting zero position");
+  stepper->resetZeroPosition();
 }
 
 void feedbackHandler(void *parameters)
