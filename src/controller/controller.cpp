@@ -20,6 +20,7 @@ void Controller::BLEServerCallbacksImpl::onConnect(BLEServer *pServer)
 {
     Serial.println("Bluetooth connected to pair");
     _controller->_mode = CONNECTED;
+    digitalWrite(GPIO_NUM_2, LOW);
 };
 
 void Controller::BLEServerCallbacksImpl::onDisconnect(BLEServer *pServer)
@@ -27,6 +28,7 @@ void Controller::BLEServerCallbacksImpl::onDisconnect(BLEServer *pServer)
     Serial.println("Bluetooth disconnected with pair");
     this->_controller->_onDisconnection();
     _controller->_mode = PAIRING;
+    digitalWrite(GPIO_NUM_2, HIGH);
 };
 
 void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pCharacteristic)
@@ -94,6 +96,9 @@ Controller::Controller()
     pService->start();
     pServer->getAdvertising()->start();
     Serial.println("Controller started");
+
+    pinMode(GPIO_NUM_2, OUTPUT);
+    digitalWrite(GPIO_NUM_2, HIGH);
 }
 
 void Controller::setOnDisconnectionCallback(void (*onDisconnection)(void))

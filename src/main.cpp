@@ -17,7 +17,7 @@ void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  stepper = new Stepper(GPIO_NUM_0, GPIO_NUM_15, GPIO_NUM_2, 10);
+  stepper = new Stepper(GPIO_NUM_0, GPIO_NUM_15, GPIO_NUM_4, 10);
   stepper->setFrequency(20);
   controller = new Controller();
   controller->setOnMoveForwardCmdCallback(&moveForward);
