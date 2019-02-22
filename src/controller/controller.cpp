@@ -35,29 +35,34 @@ void Controller::BLECharacteristicCallbacksImp::onWrite(BLECharacteristic *pChar
 {
     char const *data = pCharacteristic->getValue().c_str();
     uint8_t command = data[0] & 0xFF;
-    Serial.println("Received command : ");
-    Serial.println(command);
-    if (command == 1)
+    // Serial.println("Received command : ");
+    // Serial.println(Controller::getCmdName((COMMAND)command));
+    if (command == FORWARDCMD)
     {
         uint16_t stepNbr = (data[1] << 8) + data[2];
         this->_controller->_onMoveForwardCmd(stepNbr);
     }
-    else if (command == 2)
+    else if (command == BACKWARDCMD)
     {
         uint16_t stepNbr = (data[1] << 8) + data[2];
         this->_controller->_onMoveBackwardCmd(stepNbr);
     }
-    else if (command == 3)
+    else if (command == STOPCMD)
     {
         this->_controller->_onStopCmd();
     }
-    else if (command == 4)
+    else if (command == GOTOZEROCMD)
     {
         this->_controller->_onGoToZeroCmd();
     }
-    else if (command == 5)
+    else if (command == RESETZEROPOSITIONCMD)
     {
         this->_controller->_onResetZeroPositionCmd();
+    }
+    else if (command == SETSPEEDCMD)
+    {
+        uint8_t speed = data[1] & 0xFF;
+        this->_controller->_onSetSpeedCmd((SPEED)speed);
     }
 };
 
@@ -129,6 +134,11 @@ void Controller::setOnGoToZeroCmdCallback(void (*onGoToZeroCmd)(void))
 void Controller::setOnResetZeroPositonCmdCallback(void (*onResetZeroPositionCmd)(void))
 {
     this->_onResetZeroPositionCmd = onResetZeroPositionCmd;
+}
+
+void Controller::setOnSetSpeedCmdCallback(void (*onSetSpeedCmd)(SPEED speed))
+{
+    this->_onSetSpeedCmd = onSetSpeedCmd;
 }
 
 void Controller::notify(uint8_t *data, size_t size)
