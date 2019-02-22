@@ -60,7 +60,7 @@ public:
     switch (command)
     {
     case NONE:
-      
+      commandString.concat("NONE");
       break;
     case FORWARDCMD:
       commandString.concat("FORWARD");
